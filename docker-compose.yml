@@ -2,6 +2,7 @@ version: '3.2'
 
 services:
   elasticsearch:
+    restart: always
     build:
       context: elasticsearch/
       args:
@@ -24,6 +25,7 @@ services:
       - elk
 
   logstash:
+    restart: always
     build:
       context: logstash/
       args:
@@ -49,6 +51,7 @@ services:
       - elasticsearch
 
   kibana:
+    restart: always
     build:
       context: kibana/
       args:
