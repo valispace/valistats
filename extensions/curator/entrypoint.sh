@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 echo "$CRON /usr/bin/curator  --config ${CONFIG_FILE} ${COMMAND}" >>/etc/crontabs/root
 
