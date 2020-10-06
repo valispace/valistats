@@ -16,6 +16,7 @@ services:
         source: elasticsearch
         target: /usr/share/elasticsearch/data
     environment:
+      # Adding the 2g seems to increase now
       ES_JAVA_OPTS: "-Xmx2g -Xms2g"
       ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
       # Use single node discovery in order to disable production mode and avoid bootstrap checks
