@@ -16,7 +16,7 @@ services:
         source: elasticsearch
         target: /usr/share/elasticsearch/data
     environment:
-      ES_JAVA_OPTS: "-Xmx1g -Xms1g"
+      ES_JAVA_OPTS: "-Xmx2g -Xms2g"
       ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
       # Use single node discovery in order to disable production mode and avoid bootstrap checks
       # see https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
@@ -40,7 +40,7 @@ services:
         target: /usr/share/logstash/pipeline
         read_only: true
     environment:
-      LS_JAVA_OPTS: "-Xmx1g -Xms1g"
+      LS_JAVA_OPTS: "-Xmx2g -Xms2g"
       ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
       LOGS_PASSWORD: ${LOGS_PASSWORD}
     ports:

@@ -1,7 +1,7 @@
 # Elastic stack (ELK) on Docker
 
 [![Join the chat at https://gitter.im/deviantony/docker-elk](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/deviantony/docker-elk?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Elastic Stack version](https://img.shields.io/badge/ELK-7.6.0-blue.svg?style=flat)](https://github.com/deviantony/docker-elk/issues/473)
+[![Elastic Stack version](https://img.shields.io/badge/ELK-7.9.1-blue.svg?style=flat)](https://github.com/deviantony/docker-elk/issues/529)
 [![Build Status](https://api.travis-ci.org/deviantony/docker-elk.svg?branch=master)](https://travis-ci.org/deviantony/docker-elk)
 
 Run the latest version of the [Elastic stack][elk-stack] with Docker and Docker Compose.
@@ -9,9 +9,9 @@ Run the latest version of the [Elastic stack][elk-stack] with Docker and Docker 
 It gives you the ability to analyze any data set by using the searching/aggregation capabilities of Elasticsearch and
 the visualization power of Kibana.
 
-> :information_source: The Docker images backing this stack include [Stack Features][stack-features] (formerly X-Pack)
-with [paid features][paid-features] enabled by default (see [How to disable paid
-features](#how-to-disable-paid-features) to disable them). The [trial license][trial-license] is valid for 30 days.
+*:information_source: The Docker images backing this stack include [Stack Features][stack-features] (formerly X-Pack)
+with [paid features][paid-features] enabled by default (see [How to disable paid features](#how-to-disable-paid-features)
+to disable them). **The [trial license][trial-license] is valid for 30 days**.*
 
 Based on the official Docker images from Elastic:
 
@@ -32,6 +32,7 @@ Other available stack variants:
      * [Windows](#windows)
      * [macOS](#macos)
 2. [Usage](#usage)
+   * [Version selection](#version-selection)
    * [Bringing up the stack](#bringing-up-the-stack)
    * [Cleanup](#cleanup)
    * [Initial setup](#initial-setup)
@@ -44,6 +45,7 @@ Other available stack variants:
    * [How to configure Logstash](#how-to-configure-logstash)
    * [How to disable paid features](#how-to-disable-paid-features)
    * [How to scale out the Elasticsearch cluster](#how-to-scale-out-the-elasticsearch-cluster)
+   * [How to reset a password programmatically](#how-to-reset-a-password-programmatically)
 4. [Extensibility](#extensibility)
    * [How to add plugins](#how-to-add-plugins)
    * [How to enable the provided extensions](#how-to-enable-the-provided-extensions)
@@ -51,7 +53,6 @@ Other available stack variants:
    * [How to specify the amount of memory used by a service](#how-to-specify-the-amount-of-memory-used-by-a-service)
    * [How to enable a remote JMX connection to a service](#how-to-enable-a-remote-jmx-connection-to-a-service)
 6. [Going further](#going-further)
-   * [Using a newer stack version](#using-a-newer-stack-version)
    * [Plugins and integrations](#plugins-and-integrations)
    * [Swarm mode](#swarm-mode)
 
@@ -63,8 +64,8 @@ Other available stack variants:
 * [Docker Compose](https://docs.docker.com/compose/install/) version **1.20.0** or newer
 * 1.5 GB of RAM
 
-> :information_source: Especially on Linux, make sure your user has the [required permissions][linux-postinstall] to
-> interact with the Docker daemon.
+*:information_source: Especially on Linux, make sure your user has the [required permissions][linux-postinstall] to
+interact with the Docker daemon.*
 
 By default, the stack exposes the following ports:
 * 5000: Logstash TCP input
@@ -72,9 +73,9 @@ By default, the stack exposes the following ports:
 * 9300: Elasticsearch TCP transport
 * 5601: Kibana
 
-> :warning: Elasticsearch's [bootstrap checks][booststap-checks] were purposely disabled to facilitate the setup of the
-> Elastic stack in development environments. For production setups, we recommend users to set up their host according to
-> the instructions from the Elasticsearch documentation: [Important System Configuration][es-sys-config].
+**:warning: Elasticsearch's [bootstrap checks][booststap-checks] were purposely disabled to facilitate the setup of the
+Elastic stack in development environments. For production setups, we recommend users to set up their host according to
+the instructions from the Elasticsearch documentation: [Important System Configuration][es-sys-config].**
 
 ### SELinux
 
@@ -100,6 +101,22 @@ exclusively. Make sure the repository is cloned in one of those locations or fol
 
 ## Usage
 
+### Version selection
+
+This repository tries to stay aligned with the latest version of the Elastic stack. The `master` branch tracks the
+current major version (7.x).
+
+To use a different version of the core Elastic components, simply change the version number inside the `.env` file. If
+you are upgrading an existing stack, please carefully read the note in the next section.
+
+**:warning: Always pay attention to the [official upgrade instructions][upgrade] for each individual component before
+performing a stack upgrade.**
+
+Older major versions are also supported on separate branches:
+
+* [`release-6.x`](https://github.com/deviantony/docker-elk/tree/release-6.x): 6.x series
+* [`release-5.x`](https://github.com/deviantony/docker-elk/tree/release-5.x): 5.x series (End-Of-Life)
+
 ### Bringing up the stack
 
 Clone this repository onto the Docker host that will run the stack, then start services locally using Docker Compose:
@@ -110,7 +127,8 @@ $ docker-compose up
 
 You can also run all services in the background (detached mode) by adding the `-d` flag to the above command.
 
-> :warning: You must run `docker-compose build` first whenever you switch branch or update a base image.
+**:warning: You must rebuild the stack images with `docker-compose build` whenever you switch branch or update the
+version of an already existing stack.**
 
 If you are starting the stack for the very first time, please read the section below attentively.
 
@@ -128,7 +146,7 @@ $ docker-compose down -v
 
 ### Setting up user authentication
 
-> :information_source: Refer to [How to disable paid features](#how-to-disable-paid-features) to disable authentication.
+*:information_source: Refer to [How to disable paid features](#how-to-disable-paid-features) to disable authentication.*
 
 The stack is pre-configured with the following **privileged** bootstrap user:
 
@@ -136,7 +154,7 @@ The stack is pre-configured with the following **privileged** bootstrap user:
 * password: *changeme*
 
 Although all stack components work out-of-the-box with this user, we strongly recommend using the unprivileged [built-in
-users][builtin-users] instead for increased security. 
+users][builtin-users] instead for increased security.
 
 1. Initialize passwords for built-in users
 
@@ -153,14 +171,15 @@ Remove the `ELASTIC_PASSWORD` environment variable from the `elasticsearch` serv
 
 3. Replace usernames and passwords in configuration files
 
-Use the `kibana` user inside the Kibana configuration file (`kibana/config/kibana.yml`) and the `logstash_system` user
-inside the Logstash configuration file (`logstash/config/logstash.yml`) in place of the existing `elastic` user.
+Use the `kibana_system` user (`kibana` for releases <7.8.0) inside the Kibana configuration file
+(`kibana/config/kibana.yml`) and the `logstash_system` user inside the Logstash configuration file
+(`logstash/config/logstash.yml`) in place of the existing `elastic` user.
 
 Replace the password for the `elastic` user inside the Logstash pipeline file (`logstash/pipeline/logstash.conf`).
 
-> :information_source: Do not use the `logstash_system` user inside the Logstash *pipeline* file, it does not have
-> sufficient permissions to create indices. Follow the instructions at [Configuring Security in Logstash][ls-security]
-> to create a user with suitable roles.
+*:information_source: Do not use the `logstash_system` user inside the Logstash **pipeline** file, it does not have
+sufficient permissions to create indices. Follow the instructions at [Configuring Security in Logstash][ls-security]
+to create a user with suitable roles.*
 
 See also the [Configuration](#configuration) section below.
 
@@ -170,8 +189,8 @@ See also the [Configuration](#configuration) section below.
 $ docker-compose restart kibana logstash
 ```
 
-> :information_source: Learn more about the security of the Elastic stack at [Tutorial: Getting started with
-> security][sec-tutorial].
+*:information_source: Learn more about the security of the Elastic stack at [Tutorial: Getting started with
+security][sec-tutorial].*
 
 ### Injecting data
 
@@ -203,8 +222,8 @@ When Kibana launches for the first time, it is not configured with any index pat
 
 #### Via the Kibana web UI
 
-> :information_source: You need to inject data into Logstash before being able to configure a Logstash index pattern via
-the Kibana web UI.
+*:information_source: You need to inject data into Logstash before being able to configure a Logstash index pattern via
+the Kibana web UI.*
 
 Navigate to the _Discover_ view of Kibana from the left sidebar. You will be prompted to create an index pattern. Enter
 `logstash-*` to match Logstash indices then, on the next page, select `@timestamp` as the time filter field. Finally,
@@ -220,17 +239,18 @@ Create an index pattern via the Kibana API:
 ```console
 $ curl -XPOST -D- 'http://localhost:5601/api/saved_objects/index-pattern' \
     -H 'Content-Type: application/json' \
-    -H 'kbn-version: 7.6.0' \
+    -H 'kbn-version: 7.9.1' \
     -u elastic:<your generated elastic password> \
     -d '{"attributes":{"title":"logstash-*","timeFieldName":"@timestamp"}}'
 ```
 
-The created pattern will automatically be marked as the default index pattern as soon as the Kibana UI is opened for the first time.
+The created pattern will automatically be marked as the default index pattern as soon as the Kibana UI is opened for the
+first time.
 
 ## Configuration
 
-> :information_source: Configuration is not dynamically reloaded, you will need to restart individual components after
-any configuration change.
+*:information_source: Configuration is not dynamically reloaded, you will need to restart individual components after
+any configuration change.*
 
 ### How to configure Elasticsearch
 
@@ -276,6 +296,20 @@ settings][trial-license]).
 ### How to scale out the Elasticsearch cluster
 
 Follow the instructions from the Wiki: [Scaling out Elasticsearch](https://github.com/deviantony/docker-elk/wiki/Elasticsearch-cluster)
+
+### How to reset a password programmatically
+
+If for any reason your are unable to use Kibana to change the password of your users (including [built-in
+users][builtin-users]), you can use the Elasticsearch API instead and achieve the same result.
+
+In the example below, we reset the password of the `elastic` user (notice "/user/elastic" in the URL):
+
+```console
+$ curl -XPOST -D- 'http://localhost:9200/_security/user/elastic/_password' \
+    -H 'Content-Type: application/json' \
+    -u elastic:<your current elastic password> \
+    -d '{"password" : "<your new password>"}'
+```
 
 ## Extensibility
 
@@ -342,19 +376,6 @@ logstash:
 
 ## Going further
 
-### Using a newer stack version
-
-To use a different Elastic Stack version than the one currently available in the repository, simply change the version
-number inside the `.env` file, and rebuild the stack with:
-
-```console
-$ docker-compose build
-$ docker-compose up
-```
-
-> :warning: Always pay attention to the [upgrade instructions][upgrade] for each individual component before
-performing a stack upgrade.
-
 ### Plugins and integrations
 
 See the following Wiki pages:
@@ -377,8 +398,8 @@ If all components get deployed without any error, the following command will sho
 $ docker stack services elk
 ```
 
-> :information_source: To scale Elasticsearch in Swarm mode, configure *zen* to use the DNS name `tasks.elasticsearch`
-instead of `elasticsearch`.
+*:information_source: To scale Elasticsearch in Swarm mode, configure *zen* to use the DNS name `tasks.elasticsearch`
+instead of `elasticsearch`.*
 
 
 [elk-stack]: https://www.elastic.co/elk-stack
