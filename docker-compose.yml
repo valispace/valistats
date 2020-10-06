@@ -2,6 +2,7 @@ version: '3.2'
 
 services:
   elasticsearch:
+    restart: always
     build:
       context: elasticsearch/
       args:
@@ -14,12 +15,10 @@ services:
       - type: volume
         source: elasticsearch
         target: /usr/share/elasticsearch/data
-    ports:
-      - "9200:9200"
-      - "9300:9300"
     environment:
-      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
-      ELASTIC_PASSWORD: changeme
+      # Adding the 2g seems to increase now
+      ES_JAVA_OPTS: "-Xmx2g -Xms2g"
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
       # Use single node discovery in order to disable production mode and avoid bootstrap checks
       # see https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
       discovery.type: single-node
@@ -27,6 +26,7 @@ services:
       - elk
 
   logstash:
+    restart: always
     build:
       context: logstash/
       args:
@@ -40,18 +40,20 @@ services:
         source: ./logstash/pipeline
         target: /usr/share/logstash/pipeline
         read_only: true
-    ports:
-      - "5000:5000/tcp"
-      - "5000:5000/udp"
-      - "9600:9600"
     environment:
-      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      LS_JAVA_OPTS: "-Xmx2g -Xms2g"
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      LOGS_PASSWORD: ${LOGS_PASSWORD}
+    ports:
+      - "8080:8080"
+      - "8081:8081"
     networks:
       - elk
     depends_on:
       - elasticsearch
 
   kibana:
+    restart: always
     build:
       context: kibana/
       args:
@@ -61,8 +63,10 @@ services:
         source: ./kibana/config/kibana.yml
         target: /usr/share/kibana/config/kibana.yml
         read_only: true
+    environment:
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
     ports:
-      - "5601:5601"
+      - "${HOST_PORT}:5601"
     networks:
       - elk
     depends_on:

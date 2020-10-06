@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # unmodified from:
 # https://github.com/gliderlabs/logspout/blob/67ee3831cbd0594361bb3381380c65bdbeb3c20f/custom/build.sh
