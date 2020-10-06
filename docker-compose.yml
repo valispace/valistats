@@ -17,6 +17,7 @@ services:
         target: /usr/share/elasticsearch/data
     environment:
       # Adding the 2g seems to increase now
+      ES_HEAP_SIZE: "2g"
       ES_JAVA_OPTS: "-Xmx2g -Xms2g"
       ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
       # Use single node discovery in order to disable production mode and avoid bootstrap checks
@@ -41,6 +42,7 @@ services:
         target: /usr/share/logstash/pipeline
         read_only: true
     environment:
+      ES_HEAP_SIZE: "2g"
       LS_JAVA_OPTS: "-Xmx2g -Xms2g"
       ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
       LOGS_PASSWORD: ${LOGS_PASSWORD}
@@ -64,6 +66,8 @@ services:
         target: /usr/share/kibana/config/kibana.yml
         read_only: true
     environment:
+      ES_HEAP_SIZE: "2g"
+      LS_JAVA_OPTS: "-Xmx2g -Xms2g"
       ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
     ports:
       - "${HOST_PORT}:5601"
